@@ -129,12 +129,17 @@ class AuthServiceProxy(object):
                                'method': self.__service_name,
                                'params': args,
                                'id': AuthServiceProxy.__id_count}, default=EncodeDecimal)
-        self.__conn.request('POST', self.__url.path, postdata,
-                            {'Host': self.__url.hostname,
-                             'User-Agent': USER_AGENT,
-                             'Authorization': self.__auth_header,
-                             'Content-type': 'application/json'})
-        self.__conn.sock.settimeout(self.__timeout)
+        while True:  # https://www.python.org/dev/peps/pep-0475/
+            try:
+                self.__conn.request('POST', self.__url.path, postdata,
+                                    {'Host': self.__url.hostname,
+                                     'User-Agent': USER_AGENT,
+                                     'Authorization': self.__auth_header,
+                                     'Content-type': 'application/json'})
+                self.__conn.sock.settimeout(self.__timeout)
+                break
+            except InterruptedError:
+                continue
 
         response = self._get_response()
         if response.get('error') is not None:
