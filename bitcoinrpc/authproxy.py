@@ -139,6 +139,9 @@ class AuthServiceProxy(object):
                 self.__conn.sock.settimeout(self.__timeout)
                 break
             except InterruptedError:
+                response = self.__conn.getresponse()
+                print('response({}): {}'.format(response.status,
+                                                response.read()))
                 continue
 
         response = self._get_response()
